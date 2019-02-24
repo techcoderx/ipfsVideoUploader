@@ -202,7 +202,11 @@ function submitVideo() {
             updateProgressBar(progressPercent);
         }
     };
-    axios.post('/videoupload',formdata,contentType).then(function(response) {
+    let authmethod = 'steemconnect'
+    if (iskeychain === 'true') {
+        authmethod = 'keychain'
+    }
+    axios.post('/videoupload?authmethod=' + authmethod,formdata,contentType).then(function(response) {
         var uploaderResponse = response.data;
         console.log(uploaderResponse);
 

@@ -30,6 +30,9 @@ if (Config.UsageLogs == true) {
 // Cache hashes data in a variable
 var hashes = JSON.parse(fs.readFileSync('hashes.json','utf8'));
 
+// Cache auth method logs in a variable
+var authmethod = JSON.parse(fs.readFileSync('AuthLog.json','utf8'))
+
 // Setup HTTPS if needed
 var privateKey;
 var certificate;
@@ -156,6 +159,13 @@ app.get('/auth',(request,response) => {
 })
 
 app.post('/videoupload', (request,response) => {
+    console.log(request.query)
+    // Log auth method asynchronously
+    if (request.query.authmethod == 'keychain' || request.query.authmethod == 'steemconnect') {
+        authmethod[request.query.authmethod] += 1
+        fs.writeFile('AuthLog.json',JSON.stringify(authmethod),() => {})
+    }
+    // Upload video
     upload.fields([
         {name: 'VideoUpload', maxCount: 1},
         {name: 'SnapUpload', maxCount: 1},
@@ -465,6 +475,10 @@ app.post('/imageupload',imgUpload.single('postImg'),(request,response) => {
             imghash: file[0].hash
         })
     }))
+})
+
+app.get('/authlogs', CORS(), (request,response) => {
+    response.send(authmethod)
 })
 
 app.get('/usage', CORS(), (request,response) => {
